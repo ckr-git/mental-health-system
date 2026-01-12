@@ -1,0 +1,70 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.classpath
+.project
+.settings/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.DS_Store
+
+# Redis
+dump.rdb
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+nul
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Uploads (user data)
+uploads/
+
+# Playwright MCP
+.playwright-mcp/
+
+# Local configuration
+application-local.yml
+application-prod.yml
+
+# Backend log
+backend.log
