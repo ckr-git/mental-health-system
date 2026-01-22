@@ -104,7 +104,7 @@ export const commentApi = {
 
 // 时光信箱相关
 export const capsuleApi = {
-  create: (data: { letterType: string; title?: string; content: string; unlockType: string; unlockTime?: string; unlockConditions?: string[] }) => 
+  create: (data: { letterType: string; title?: string; content: string; unlockType: string; unlockDate?: string; unlockConditions?: string }) =>
     request.post<any, ApiResponse<string>>('/patient/time-capsule/create', data),
   
   getList: (params: { pageNum: number; pageSize: number; status?: string }) => 

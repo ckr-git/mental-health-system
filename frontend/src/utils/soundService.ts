@@ -22,6 +22,7 @@ class SoundService {
   }
 
   // 交互音效文件映射
+  // 注：unlock/place/interact 使用已有音效作为替代
   private interactionSounds: Record<string, string> = {
     'card-flip': '/sounds/card-flip.mp3',
     'write': '/sounds/write.mp3',
@@ -29,9 +30,9 @@ class SoundService {
     'send-letter': '/sounds/send.mp3',
     'open-letter': '/sounds/open.mp3',
     'click': '/sounds/click.mp3',
-    'unlock': '/sounds/unlock.mp3',
-    'place': '/sounds/place.mp3',
-    'interact': '/sounds/interact.mp3'
+    'unlock': '/sounds/open.mp3',
+    'place': '/sounds/click.mp3',
+    'interact': '/sounds/click.mp3'
   }
 
   /**
