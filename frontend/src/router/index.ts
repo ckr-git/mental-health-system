@@ -206,8 +206,9 @@ router.beforeEach((to, from, next) => {
       next('/login')
     } else if (to.meta.role && userStore.userInfo?.role !== to.meta.role) {
       // 角色不匹配，重定向到对应角色的首页
-      const role = userStore.userInfo?.role.toLowerCase()
-      next(`/${role}`)
+      const role = userStore.userInfo?.role
+      const rolePath = typeof role === 'string' ? role.toLowerCase() : 'patient'
+      next(`/${rolePath}`)
     } else {
       next()
     }

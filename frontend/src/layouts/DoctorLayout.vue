@@ -1,63 +1,83 @@
 <template>
   <el-container class="layout-container">
-    <el-aside width="200px">
+    <!-- 侧边栏 -->
+    <el-aside width="240px" class="sidebar">
       <div class="logo">
+        <div class="logo-icon">👨‍⚕️</div>
         <h3>医生工作台</h3>
       </div>
-      <el-menu :default-active="activeMenu" router>
+
+      <el-menu :default-active="activeMenu" router class="sidebar-menu">
         <el-menu-item index="/doctor/dashboard">
-          <el-icon><House /></el-icon>
-          <span>📈 工作台</span>
+          <div class="menu-icon">📈</div>
+          <span>工作台</span>
         </el-menu-item>
         <el-menu-item index="/doctor/patients">
-          <el-icon><User /></el-icon>
-          <span>👥 患者管理</span>
+          <div class="menu-icon">👥</div>
+          <span>患者管理</span>
         </el-menu-item>
         <el-menu-item index="/doctor/patient-pool">
-          <el-icon><User /></el-icon>
-          <span>🌊 患者公海</span>
+          <div class="menu-icon">🌊</div>
+          <span>患者公海</span>
         </el-menu-item>
         <el-menu-item index="/doctor/reports">
-          <el-icon><Document /></el-icon>
-          <span>📋 评估报告</span>
+          <div class="menu-icon">📋</div>
+          <span>评估报告</span>
         </el-menu-item>
         <el-menu-item index="/doctor/chat">
-          <el-icon><ChatLineRound /></el-icon>
-          <span>💬 在线咨询</span>
+          <div class="menu-icon">💬</div>
+          <span>在线咨询</span>
         </el-menu-item>
         <el-menu-item index="/doctor/consultations">
-          <el-icon><ChatLineRound /></el-icon>
-          <span>💼 咨询管理</span>
+          <div class="menu-icon">💼</div>
+          <span>咨询管理</span>
         </el-menu-item>
         <el-menu-item index="/doctor/appointments">
-          <el-icon><Calendar /></el-icon>
-          <span>📅 预约管理</span>
+          <div class="menu-icon">📅</div>
+          <span>预约管理</span>
         </el-menu-item>
         <el-menu-item index="/doctor/profile">
-          <el-icon><Setting /></el-icon>
-          <span>⚙️ 个人中心</span>
+          <div class="menu-icon">⚙️</div>
+          <span>个人中心</span>
         </el-menu-item>
       </el-menu>
+
+      <!-- 底部装饰 -->
+      <div class="sidebar-footer">
+        <div class="status-tip">在线接诊中</div>
+      </div>
     </el-aside>
-    
-    <el-container>
-      <el-header>
-        <div class="header-content">
-          <span class="welcome">欢迎，{{ userStore.userInfo?.nickname }} 医生</span>
-          <el-dropdown @command="handleCommand">
-            <span class="el-dropdown-link">
-              <el-avatar :src="userStore.userInfo?.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'" />
-            </span>
+
+    <!-- 主内容区 -->
+    <el-container class="main-container">
+      <el-header class="header">
+        <div class="header-left">
+          <span class="greeting">{{ getGreeting() }}，{{ userStore.userInfo?.nickname || '医生' }}</span>
+        </div>
+        <div class="header-right">
+          <el-dropdown @command="handleCommand" trigger="click">
+            <div class="user-info">
+              <el-avatar
+                :size="36"
+                :src="userStore.userInfo?.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'"
+              />
+              <el-icon class="dropdown-icon"><ArrowDown /></el-icon>
+            </div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+                <el-dropdown-item command="profile">
+                  <el-icon><User /></el-icon>个人资料
+                </el-dropdown-item>
+                <el-dropdown-item command="logout" divided>
+                  <el-icon><SwitchButton /></el-icon>退出登录
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
         </div>
       </el-header>
-      
-      <el-main>
+
+      <el-main class="main-content">
         <router-view />
       </el-main>
     </el-container>
@@ -68,6 +88,7 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
+import { ArrowDown, User, SwitchButton } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { authApi } from '@/api'
 
@@ -76,6 +97,17 @@ const route = useRoute()
 const userStore = useUserStore()
 
 const activeMenu = computed(() => route.path)
+
+const getGreeting = () => {
+  const hour = new Date().getHours()
+  if (hour < 6) return '夜深了'
+  if (hour < 9) return '早上好'
+  if (hour < 12) return '上午好'
+  if (hour < 14) return '中午好'
+  if (hour < 18) return '下午好'
+  if (hour < 22) return '晚上好'
+  return '夜深了'
+}
 
 const handleCommand = async (command: string) => {
   if (command === 'logout') {
@@ -88,6 +120,8 @@ const handleCommand = async (command: string) => {
       userStore.logout()
       router.push('/login')
     })
+  } else if (command === 'profile') {
+    router.push('/doctor/profile')
   }
 }
 </script>
@@ -95,68 +129,129 @@ const handleCommand = async (command: string) => {
 <style scoped>
 .layout-container {
   height: 100vh;
+  background: #FAFAFA;
 }
 
-.el-aside {
-  background-color: #304156;
-  color: #fff;
+/* 侧边栏 */
+.sidebar {
+  background: linear-gradient(180deg, #E8FAF8 0%, #FFFFFF 100%);
+  border-right: 1px solid #D4F5F0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .logo {
-  height: 60px;
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #2b3a4a;
+  gap: 10px;
+  background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+}
+
+.logo-icon {
+  font-size: 28px;
 }
 
 .logo h3 {
   margin: 0;
   color: #fff;
-  font-size: 16px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 2px;
 }
 
-.el-menu {
+/* 菜单样式 */
+.sidebar-menu {
+  flex: 1;
   border-right: none;
-  background-color: #304156;
+  background: transparent;
+  padding: 12px 8px;
 }
 
 :deep(.el-menu-item) {
-  color: #bfcbd9;
+  height: 48px;
+  line-height: 48px;
+  margin: 4px 0;
+  border-radius: 12px;
+  color: #636E72;
+  transition: all 0.25s ease;
 }
 
-:deep(.el-menu-item:hover),
+:deep(.el-menu-item:hover) {
+  background: #E8FAF8 !important;
+  color: #4ECDC4 !important;
+}
+
 :deep(.el-menu-item.is-active) {
-  background-color: #263445 !important;
-  color: #409eff !important;
+  background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
 }
 
-.el-header {
-  background-color: #fff;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+.menu-icon {
+  font-size: 18px;
+  margin-right: 12px;
+  width: 24px;
+  text-align: center;
 }
 
-.header-content {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.welcome {
-  color: #606266;
-}
-
-.el-dropdown-link {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.el-main {
-  background-color: #f5f7fa;
+/* 侧边栏底部 */
+.sidebar-footer {
   padding: 20px;
+  text-align: center;
+}
+
+.status-tip {
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #4ECDC420 0%, #44A08D10 100%);
+  border-radius: 12px;
+  color: #4ECDC4;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* 头部 */
+.header {
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 64px;
+}
+
+.greeting {
+  font-size: 16px;
+  color: #2D3436;
+  font-weight: 500;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: all 0.25s ease;
+}
+
+.user-info:hover {
+  background: #E8FAF8;
+}
+
+.dropdown-icon {
+  color: #B2BEC3;
+  font-size: 12px;
+}
+
+/* 主内容区 */
+.main-content {
+  background: #FAFAFA;
+  padding: 24px;
+  overflow-y: auto;
 }
 </style>

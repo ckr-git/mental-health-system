@@ -1,0 +1,78 @@
+// ============================================
+// 温暖阳光主题 - Warm Sunshine Theme
+// ============================================
+
+// 主题色
+$primary-color: #FF6B6B;
+$secondary-color: #4ECDC4;
+$accent-color: #FFE66D;
+$success-color: #51CF66;
+$warning-color: #FFB347;
+$danger-color: #FF6B6B;
+$info-color: #74C0FC;
+
+// 背景色
+$bg-primary: #FAFAFA;
+$bg-secondary: #FFFFFF;
+$bg-card: #FFFFFF;
+$bg-hover: #FFF5F5;
+
+// 文字色
+$text-primary: #2D3436;
+$text-secondary: #636E72;
+$text-muted: #B2BEC3;
+$text-light: #DFE6E9;
+
+// 边框色
+$border-color: #E8E8E8;
+$border-light: #F0F0F0;
+
+// 渐变
+$gradient-primary: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 100%);
+$gradient-secondary: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+$gradient-warm: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%);
+$gradient-cool: linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%);
+
+// 圆角
+$radius-xs: 4px;
+$radius-sm: 8px;
+$radius-md: 12px;
+$radius-lg: 20px;
+$radius-xl: 28px;
+$radius-full: 9999px;
+
+// 阴影
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+$shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+$shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+$shadow-primary: 0 4px 14px rgba(255, 107, 107, 0.4);
+$shadow-secondary: 0 4px 14px rgba(78, 205, 196, 0.4);
+
+// 过渡
+$transition-fast: 0.15s ease;
+$transition-normal: 0.25s ease;
+$transition-slow: 0.35s ease;
+
+// 字体
+$font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+              'Helvetica Neue', Arial, 'Noto Sans SC', sans-serif;
+
+// 字号
+$font-xs: 12px;
+$font-sm: 13px;
+$font-base: 14px;
+$font-md: 16px;
+$font-lg: 18px;
+$font-xl: 20px;
+$font-2xl: 24px;
+$font-3xl: 30px;
+
+// 间距
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-2xl: 48px;

@@ -1,0 +1,73 @@
+// ============================================
+// Element Plus 主题覆盖
+// ============================================
+
+@use './theme.scss' as *;
+
+// 按钮
+.el-button {
+  border-radius: $radius-md;
+  font-weight: 500;
+  transition: all $transition-normal;
+
+  &--primary {
+    background: $gradient-primary;
+    border: none;
+    &:hover, &:focus {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: $shadow-primary;
+    }
+  }
+
+  &--success {
+    background: $secondary-color;
+    border-color: $secondary-color;
+    &:hover, &:focus {
+      background: darken($secondary-color, 5%);
+      border-color: darken($secondary-color, 5%);
+    }
+  }
+}
+
+// 卡片
+.el-card {
+  border-radius: $radius-lg;
+  border: none;
+  box-shadow: $shadow-sm;
+  transition: all $transition-normal;
+
+  &:hover {
+    box-shadow: $shadow-md;
+  }
+
+  .el-card__header {
+    border-bottom: 1px solid $border-light;
+    padding: $spacing-md $spacing-lg;
+    font-weight: 600;
+    color: $text-primary;
+  }
+
+  .el-card__body {
+    padding: $spacing-lg;
+  }
+}
+
+// 输入框
+.el-input {
+  .el-input__wrapper {
+    border-radius: $radius-md;
+    box-shadow: none;
+    border: 1px solid $border-color;
+    transition: all $transition-fast;
+
+    &:hover {
+      border-color: $primary-color;
+    }
+
+    &.is-focus {
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+    }
+  }
+}
