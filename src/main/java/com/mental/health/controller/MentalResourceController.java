@@ -1,6 +1,7 @@
 package com.mental.health.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mental.health.common.Result;
@@ -56,13 +57,13 @@ public class MentalResourceController {
 
     @GetMapping("/public/resources/{id}")
     public Result<MentalResource> getResourceDetail(@PathVariable Long id) {
+        int rows = resourceMapper.update(null, new LambdaUpdateWrapper<MentalResource>()
+                .eq(MentalResource::getId, id)
+                .eq(MentalResource::getStatus, 1)
+                .setSql("view_count = COALESCE(view_count, 0) + 1"));
+        if (rows <= 0) return Result.error("资源不存在");
         MentalResource resource = resourceMapper.selectById(id);
-        if (resource != null) {
-            resource.setViewCount(resource.getViewCount() + 1);
-            resourceMapper.updateById(resource);
-            return Result.success(resource);
-        }
-        return Result.error("资源不存在");
+        return resource != null ? Result.success(resource) : Result.error("资源不存在");
     }
 
     @GetMapping("/public/resources/hot")

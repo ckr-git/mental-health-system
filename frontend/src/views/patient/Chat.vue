@@ -108,7 +108,7 @@ import { ref, onMounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { UserFilled, Picture } from '@element-plus/icons-vue'
-import request from '@/utils/request'
+import { chatApi } from '@/api'
 
 const route = useRoute()
 
@@ -143,7 +143,7 @@ const scrollbarRef = ref()
 
 const loadChatList = async () => {
   try {
-    const { data } = await request.get('/patient/chat/list')
+    const { data } = await chatApi.getChatList()
     chatList.value = data || []
 
     const doctorId = route.query.doctorId
@@ -162,7 +162,7 @@ const loadChatList = async () => {
 
 const createChat = async (doctorId: string) => {
   try {
-    const { data } = await request.post('/patient/chat/create', { doctorId })
+    const { data } = await chatApi.createChat(doctorId)
     chatList.value.unshift(data)
     selectChat(data)
   } catch (error) {
@@ -183,10 +183,7 @@ const selectChat = async (chat: ChatItem) => {
 const loadMessages = async () => {
   if (!currentChat.value) return
   try {
-    const { data } = await request.get(
-      `/patient/chat/messages/${currentChat.value.sessionId}`,
-      { params: { pageNum: 1, pageSize: 100 } }
-    )
+    const { data } = await chatApi.getMessages(currentChat.value.sessionId, { pageNum: 1, pageSize: 100 })
     messages.value = data?.records || []
     scrollToBottom()
   } catch (error) {
@@ -199,7 +196,7 @@ const sendMessage = async () => {
 
   sending.value = true
   try {
-    const { data } = await request.post('/patient/chat/send', {
+    const { data } = await chatApi.sendMessage({
       sessionId: currentChat.value.sessionId,
       targetUserId: currentChat.value.userId,
       content: inputMessage.value,
@@ -221,13 +218,9 @@ const handleImageUpload = async (file: File) => {
   if (!currentChat.value) return false
 
   try {
-    const formData = new FormData()
-    formData.append('file', file)
-    const uploadRes = await request.post('/chat/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
+    const uploadRes = await chatApi.uploadImage(file)
 
-    const { data } = await request.post('/patient/chat/send', {
+    const { data } = await chatApi.sendMessage({
       sessionId: currentChat.value.sessionId,
       targetUserId: currentChat.value.userId,
       content: uploadRes.data.url,
@@ -245,7 +238,7 @@ const handleImageUpload = async (file: File) => {
 const markAsRead = async () => {
   if (!currentChat.value) return
   try {
-    await request.post(`/patient/chat/read/${currentChat.value.sessionId}`)
+    await chatApi.markAsRead(currentChat.value.sessionId)
   } catch (error) {
     console.error('标记已读失败')
   }

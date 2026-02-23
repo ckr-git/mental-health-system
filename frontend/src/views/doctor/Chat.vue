@@ -131,7 +131,7 @@
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { UserFilled, Picture } from '@element-plus/icons-vue'
-import request from '@/utils/request'
+import { doctorChatApi } from '@/api'
 
 const defaultAvatar = '/default-avatar.jpg'
 
@@ -173,7 +173,7 @@ const filteredChatList = computed(() => {
 
 const loadChatList = async () => {
   try {
-    const { data } = await request.get('/doctor/chat/list')
+    const { data } = await doctorChatApi.getChatList()
     chatList.value = data || []
   } catch (error) {
     ElMessage.error('加载聊天列表失败')
@@ -192,10 +192,7 @@ const selectChat = async (chat: ChatItem) => {
 const loadMessages = async () => {
   if (!selectedChat.value) return
   try {
-    const { data } = await request.get(
-      `/doctor/chat/messages/${selectedChat.value.sessionId}`,
-      { params: { pageNum: 1, pageSize: 100 } }
-    )
+    const { data } = await doctorChatApi.getMessages(selectedChat.value.sessionId, { pageNum: 1, pageSize: 100 })
     messages.value = data?.records || []
     scrollToBottom()
   } catch (error) {
@@ -207,7 +204,7 @@ const sendMessage = async () => {
   if (!messageText.value.trim() || !selectedChat.value) return
   sending.value = true
   try {
-    const { data } = await request.post('/doctor/chat/send', {
+    const { data } = await doctorChatApi.sendMessage({
       sessionId: selectedChat.value.sessionId,
       targetUserId: selectedChat.value.userId,
       content: messageText.value,
@@ -228,12 +225,8 @@ const sendMessage = async () => {
 const handleImageUpload = async (file: File) => {
   if (!selectedChat.value) return false
   try {
-    const formData = new FormData()
-    formData.append('file', file)
-    const uploadRes = await request.post('/chat/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-    const { data } = await request.post('/doctor/chat/send', {
+    const uploadRes = await doctorChatApi.uploadImage(file)
+    const { data } = await doctorChatApi.sendMessage({
       sessionId: selectedChat.value.sessionId,
       targetUserId: selectedChat.value.userId,
       content: uploadRes.data.url,
@@ -250,7 +243,7 @@ const handleImageUpload = async (file: File) => {
 const markAsRead = async () => {
   if (!selectedChat.value) return
   try {
-    await request.post(`/doctor/chat/read/${selectedChat.value.sessionId}`)
+    await doctorChatApi.markAsRead(selectedChat.value.sessionId)
   } catch (error) {
     console.error('标记已读失败')
   }

@@ -128,7 +128,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
-import request from '@/utils/request'
+import { treeHoleApi } from '@/api'
 
 // Props
 const props = defineProps<{
@@ -249,7 +249,7 @@ const handleSubmit = async () => {
       viewCondition: form.value.expireType === 'conditional' ? form.value.viewCondition : null
     }
 
-    await request.post('/patient/tree-hole/add', data)
+    await treeHoleApi.add(data)
 
     ElMessage.success('已投入树洞')
     emit('success')

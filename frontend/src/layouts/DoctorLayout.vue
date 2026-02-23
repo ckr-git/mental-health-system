@@ -1,57 +1,46 @@
 <template>
   <el-container class="layout-container">
-    <!-- 侧边栏 -->
-    <el-aside width="240px" class="sidebar">
+    <!-- 桌面侧边栏 -->
+    <el-aside v-if="!isMobile" width="240px" class="sidebar">
       <div class="logo">
         <div class="logo-icon">👨‍⚕️</div>
         <h3>医生工作台</h3>
       </div>
-
       <el-menu :default-active="activeMenu" router class="sidebar-menu">
-        <el-menu-item index="/doctor/dashboard">
-          <div class="menu-icon">📈</div>
-          <span>工作台</span>
-        </el-menu-item>
-        <el-menu-item index="/doctor/patients">
-          <div class="menu-icon">👥</div>
-          <span>患者管理</span>
-        </el-menu-item>
-        <el-menu-item index="/doctor/patient-pool">
-          <div class="menu-icon">🌊</div>
-          <span>患者公海</span>
-        </el-menu-item>
-        <el-menu-item index="/doctor/reports">
-          <div class="menu-icon">📋</div>
-          <span>评估报告</span>
-        </el-menu-item>
-        <el-menu-item index="/doctor/chat">
-          <div class="menu-icon">💬</div>
-          <span>在线咨询</span>
-        </el-menu-item>
-        <el-menu-item index="/doctor/consultations">
-          <div class="menu-icon">💼</div>
-          <span>咨询管理</span>
-        </el-menu-item>
-        <el-menu-item index="/doctor/appointments">
-          <div class="menu-icon">📅</div>
-          <span>预约管理</span>
-        </el-menu-item>
-        <el-menu-item index="/doctor/profile">
-          <div class="menu-icon">⚙️</div>
-          <span>个人中心</span>
-        </el-menu-item>
+        <el-menu-item index="/doctor/dashboard"><div class="menu-icon">📈</div><span>工作台</span></el-menu-item>
+        <el-menu-item index="/doctor/patients"><div class="menu-icon">👥</div><span>患者管理</span></el-menu-item>
+        <el-menu-item index="/doctor/patient-pool"><div class="menu-icon">🌊</div><span>患者公海</span></el-menu-item>
+        <el-menu-item index="/doctor/reports"><div class="menu-icon">📋</div><span>评估报告</span></el-menu-item>
+        <el-menu-item index="/doctor/chat"><div class="menu-icon">💬</div><span>在线咨询</span></el-menu-item>
+        <el-menu-item index="/doctor/consultations"><div class="menu-icon">💼</div><span>咨询管理</span></el-menu-item>
+        <el-menu-item index="/doctor/appointments"><div class="menu-icon">📅</div><span>预约管理</span></el-menu-item>
+        <el-menu-item index="/doctor/profile"><div class="menu-icon">⚙️</div><span>个人中心</span></el-menu-item>
       </el-menu>
-
-      <!-- 底部装饰 -->
-      <div class="sidebar-footer">
-        <div class="status-tip">在线接诊中</div>
-      </div>
+      <div class="sidebar-footer"><div class="status-tip">在线接诊中</div></div>
     </el-aside>
+
+    <!-- 移动端抽屉 -->
+    <el-drawer v-model="drawerVisible" direction="ltr" size="240px" :show-close="false" :with-header="false">
+      <div style="margin: -20px -20px 0; height: 72px; display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #4ECDC4, #44A08D);">
+        <div style="font-size: 28px;">👨‍⚕️</div><h3 style="margin:0;color:#fff;font-size:20px;font-weight:600;">医生工作台</h3>
+      </div>
+      <el-menu :default-active="activeMenu" router @select="onMenuSelect" style="border-right:none;padding:12px 0;">
+        <el-menu-item index="/doctor/dashboard"><div class="menu-icon">📈</div><span>工作台</span></el-menu-item>
+        <el-menu-item index="/doctor/patients"><div class="menu-icon">👥</div><span>患者管理</span></el-menu-item>
+        <el-menu-item index="/doctor/patient-pool"><div class="menu-icon">🌊</div><span>患者公海</span></el-menu-item>
+        <el-menu-item index="/doctor/reports"><div class="menu-icon">📋</div><span>评估报告</span></el-menu-item>
+        <el-menu-item index="/doctor/chat"><div class="menu-icon">💬</div><span>在线咨询</span></el-menu-item>
+        <el-menu-item index="/doctor/consultations"><div class="menu-icon">💼</div><span>咨询管理</span></el-menu-item>
+        <el-menu-item index="/doctor/appointments"><div class="menu-icon">📅</div><span>预约管理</span></el-menu-item>
+        <el-menu-item index="/doctor/profile"><div class="menu-icon">⚙️</div><span>个人中心</span></el-menu-item>
+      </el-menu>
+    </el-drawer>
 
     <!-- 主内容区 -->
     <el-container class="main-container">
       <el-header class="header">
         <div class="header-left">
+          <span v-if="isMobile" class="hamburger" @click="drawerVisible = true">☰</span>
           <span class="greeting">{{ getGreeting() }}，{{ userStore.userInfo?.nickname || '医生' }}</span>
         </div>
         <div class="header-right">
@@ -85,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import { ArrowDown, User, SwitchButton } from '@element-plus/icons-vue'
@@ -97,6 +86,12 @@ const route = useRoute()
 const userStore = useUserStore()
 
 const activeMenu = computed(() => route.path)
+const isMobile = ref(window.innerWidth <= 768)
+const drawerVisible = ref(false)
+const onResize = () => { isMobile.value = window.innerWidth <= 768 }
+onMounted(() => window.addEventListener('resize', onResize))
+onUnmounted(() => window.removeEventListener('resize', onResize))
+const onMenuSelect = () => { if (isMobile.value) drawerVisible.value = false }
 
 const getGreeting = () => {
   const hour = new Date().getHours()
@@ -253,5 +248,12 @@ const handleCommand = async (command: string) => {
   background: #FAFAFA;
   padding: 24px;
   overflow-y: auto;
+}
+
+.hamburger {
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 12px;
+  color: #636E72;
 }
 </style>

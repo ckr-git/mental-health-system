@@ -191,7 +191,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Document, View, Star, Download } from '@element-plus/icons-vue'
-import request from '@/utils/request'
+import { adminApi } from '@/api'
 
 const loading = ref(false)
 const saving = ref(false)
@@ -233,7 +233,7 @@ const currentResource = reactive({
 
 const loadStatistics = async () => {
   try {
-    const res = await request.get('/admin/resources/statistics')
+    const res = await adminApi.getResourceStatistics()
     if (res.code === 200 && res.data) {
       Object.assign(statistics, res.data)
     }
@@ -253,7 +253,7 @@ const loadResources = async () => {
       status: filters.status,
       keyword: filters.keyword || undefined
     }
-    const res = await request.get('/admin/resources', { params })
+    const res = await adminApi.getResources(params)
     if (res.code === 200 && res.data) {
       resources.value = res.data.records || []
       pagination.total = res.data.total || 0
@@ -300,8 +300,8 @@ const saveResource = async () => {
   saving.value = true
   try {
     const res = currentResource.id
-      ? await request.put(`/admin/resources/${currentResource.id}`, currentResource)
-      : await request.post('/admin/resources', currentResource)
+      ? await adminApi.updateResource(currentResource)
+      : await adminApi.addResource(currentResource)
 
     if (res.code === 200) {
       ElMessage.success(currentResource.id ? '更新成功' : '创建成功')
@@ -321,7 +321,7 @@ const saveResource = async () => {
 const toggleStatus = async (resource: any) => {
   try {
     const newStatus = resource.status === 1 ? 0 : 1
-    const res = await request.put(`/admin/resources/${resource.id}/status`, { status: newStatus })
+    const res = await adminApi.updateResourceStatus(resource.id, { status: newStatus })
     if (res.code === 200) {
       ElMessage.success(newStatus === 1 ? '发布成功' : '下架成功')
       loadResources()
@@ -336,7 +336,7 @@ const toggleStatus = async (resource: any) => {
 const deleteResource = async (resource: any) => {
   try {
     await ElMessageBox.confirm('确定要删除此资源吗？', '警告', { type: 'warning' })
-    const res = await request.delete(`/admin/resources/${resource.id}`)
+    const res = await adminApi.deleteResource(resource.id)
     if (res.code === 200) {
       ElMessage.success('删除成功')
       loadResources()

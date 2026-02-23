@@ -86,7 +86,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import request from '@/utils/request'
+import { treeHoleApi } from '@/api'
 
 // Props
 interface Props {
@@ -122,7 +122,7 @@ watch(() => props.id, async (newId) => {
 const loadDetail = async (id: number) => {
   try {
     loading.value = true
-    const res = await request.get(`/patient/tree-hole/view/${id}`)
+    const res = await treeHoleApi.view(id)
 
     if (res.code === 200) {
       detail.value = res.data

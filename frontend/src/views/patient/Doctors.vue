@@ -15,7 +15,7 @@
           <el-input v-model="searchForm.keyword" placeholder="搜索医生" clearable style="width: 200px" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="loadDoctors">搜索</el-button>
+          <el-button type="primary" @click="() => { page = 1; loadDoctors() }">搜索</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -28,7 +28,7 @@
               <el-icon :size="40"><UserFilled /></el-icon>
             </el-avatar>
             <div class="doctor-info">
-              <h3>{{ doctor.name }}</h3>
+              <h3>{{ doctor.nickname || doctor.username }}</h3>
               <el-tag size="small">{{ doctor.title || '主治医师' }}</el-tag>
               <div class="rating">
                 <el-rate v-model="doctor.rating" disabled show-score text-color="#ff9900" />
@@ -104,11 +104,11 @@ const total = ref(0)
 const loadDoctors = async () => {
   loading.value = true
   try {
-    const { data } = await userApi.getDoctorList({
-      page: page.value,
-      size: pageSize.value,
-      specialty: searchForm.value.specialty,
-      keyword: searchForm.value.keyword
+    const { data } = await userApi.getDoctors({
+      pageNum: page.value,
+      pageSize: pageSize.value,
+      specialty: searchForm.value.specialty || undefined,
+      keyword: searchForm.value.keyword || undefined
     })
     doctors.value = data.records
     total.value = data.total

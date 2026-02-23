@@ -167,7 +167,6 @@ import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { capsuleApi } from '@/api'
 import LetterRecommendationCard from './LetterRecommendationCard.vue'
-import request from '@/utils/request'
 
 // Props
 const props = defineProps<{
@@ -391,7 +390,7 @@ watch(() => props.visible, (val) => {
 const handleLoadRecommendation = async () => {
   try {
     loadingRecommendation.value = true
-    const res = await request.get('/patient/time-capsule/recommend')
+    const res = await capsuleApi.getRecommend()
     if (res.code === 200 && res.data) {
       recommendation.value = res.data
       showRecommendation.value = true

@@ -10,6 +10,8 @@ const service: AxiosInstance = axios.create({
   timeout: 60000  // 增加到60秒，用于AI报告生成
 })
 
+let isRedirecting = false
+
 // 请求拦截器
 service.interceptors.request.use(
   (config) => {
@@ -33,14 +35,15 @@ service.interceptors.response.use(
     if (res.code !== 200) {
       ElMessage.error(res.message || '请求失败')
 
-      if (res.code === 401) {
+      if (res.code === 401 && !isRedirecting) {
+        isRedirecting = true
         const userStore = useUserStore()
         userStore.logout()
-        // 延迟跳转，给组件处理错误的时间
         setTimeout(() => {
           if (router.currentRoute.value.path !== '/login') {
             router.push('/login')
           }
+          isRedirecting = false
         }, 100)
       }
 
@@ -52,17 +55,17 @@ service.interceptors.response.use(
   (error) => {
     console.error('Response error:', error)
 
-    if (error.response?.status === 401) {
-      // 静默处理401错误，不显示重复提示
+    if (error.response?.status === 401 && !isRedirecting) {
+      isRedirecting = true
       const userStore = useUserStore()
       userStore.logout()
-      // 延迟跳转，给组件处理错误的时间
       setTimeout(() => {
         if (router.currentRoute.value.path !== '/login') {
           router.push('/login')
         }
+        isRedirecting = false
       }, 100)
-    } else {
+    } else if (error.response?.status !== 401) {
       ElMessage.error(error.response?.data?.message || error.message || '网络错误')
     }
 

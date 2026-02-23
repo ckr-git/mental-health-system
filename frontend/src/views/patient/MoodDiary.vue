@@ -160,7 +160,7 @@
       width="900px"
       class="diary-detail-dialog"
     >
-      <div class="diary-detail" v-if="currentDiary" v-loading="detailLoading">
+      <div class="diary-detail" v-if="currentDiary" v-loading="loading">
         <!-- 日记头部 -->
         <div class="detail-header">
           <div class="header-left">
@@ -270,8 +270,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { onMounted } from 'vue'
 import { HomeFilled } from '@element-plus/icons-vue'
 import WeatherBackground from '@/components/MoodDiary/WeatherBackground.vue'
 import LightSwitch from '@/components/MoodDiary/LightSwitch.vue'
@@ -279,359 +278,32 @@ import DiaryCard from '@/components/MoodDiary/DiaryCard.vue'
 import MoodCommentDialog from '@/components/MoodDiary/MoodCommentDialog.vue'
 import CommentTimeline from '@/components/MoodDiary/CommentTimeline.vue'
 import MoodForecast from '@/components/MoodDiary/MoodForecast.vue'
-import { symptomApi, commentApi } from '@/api'
-import { playSound } from '@/utils/soundService'
-import { useUserStore } from '@/stores/user'
+import { useMoodDiary } from './mood-diary/useMoodDiary'
+import { useComments } from './mood-diary/useComments'
+import { moodEmojis, getWeatherIcon, getWeatherLabel, formatDateTime } from './mood-diary/helpers'
 
-// 用户状态
-const userStore = useUserStore()
+const {
+  lightMode, diaries, loading, currentPage, pageSize, total,
+  showAddDialog, submitting, newDiary, showDetailDialog, currentDiary,
+  currentWeather, hasDimensions,
+  toggleLight, selectMood, updateMoodEmoji,
+  loadDiaries, handleAddDiary, handleStatusChange
+} = useMoodDiary()
 
-// 灯光模式
-const lightMode = ref<'day' | 'night'>('day')
+const {
+  showCommentDialog, comments, commentsLoading, hasMoreComments,
+  loadComments, handleLikeComment, handleReplyComment, handleDeleteComment,
+  loadMoreComments, handleCommentSuccess
+} = useComments(currentDiary)
 
-// 天气类型（根据最新日记或当前编辑的心情自动设置）
-const currentWeather = computed(() => {
-  // 如果正在写日记,使用新日记的心情
-  if (showAddDialog.value && newDiary.value.moodScore) {
-    const score = newDiary.value.moodScore
-    if (score <= 2) return 'storm'
-    if (score <= 4) return 'rain'
-    if (score <= 6) return 'cloudy'
-    if (score <= 8) return 'sunny'
-    return 'clear'
-  }
-
-  // 否则使用最新日记的天气
-  if (diaries.value.length > 0) {
-    return diaries.value[0].weatherType || 'sunny'
-  }
-
-  // 默认晴朗
-  return 'sunny'
-})
-
-// 心情表情映射
-const moodEmojis: Record<number, string> = {
-  1: '😭', 2: '😢', 3: '😔', 4: '😕', 5: '😐',
-  6: '🙂', 7: '😊', 8: '😄', 9: '😁', 10: '🤩'
-}
-
-// 日记列表
-const diaries = ref<any[]>([])
-const loading = ref(false)
-const currentPage = ref(1)
-const pageSize = ref(9)
-const total = ref(0)
-
-// 新日记表单
-const showAddDialog = ref(false)
-const submitting = ref(false)
-const newDiary = ref<{
-  moodScore: number
-  moodEmoji: string
-  title: string
-  content: string
-  energyLevel: number
-  sleepQuality: number
-  stressLevel: number
-}>({
-  moodScore: 5,
-  moodEmoji: '😐',
-  title: '',
-  content: '',
-  energyLevel: 5,
-  sleepQuality: 5,
-  stressLevel: 5
-})
-
-// 日记详情
-const showDetailDialog = ref(false)
-const currentDiary = ref<any>(null)
-const detailLoading = ref(false)
-
-// 留言相关
-const showCommentDialog = ref(false)
-const comments = ref<any[]>([])
-const commentsLoading = ref(false)
-const hasMoreComments = ref(false)
-const commentsPage = ref(1)
-const commentsPageSize = ref(20)
-
-// 是否有多维度评分
-const hasDimensions = computed(() => {
-  if (!currentDiary.value) return false
-  return currentDiary.value.energyLevel || currentDiary.value.sleepQuality || currentDiary.value.stressLevel
-})
-
-// 切换灯光
-const toggleLight = async () => {
-  lightMode.value = lightMode.value === 'day' ? 'night' : 'day'
-  const message = lightMode.value === 'day' ? '开灯啦 💡' : '关灯啦 🌙'
-  ElMessage.success(message)
-  
-  // TODO: 调用后端API保存灯光模式
-}
-
-// 选择心情
-const selectMood = (score: number, emoji: string) => {
-  newDiary.value.moodScore = Number(score)
-  newDiary.value.moodEmoji = emoji
-}
-
-// 更新心情表情
-const updateMoodEmoji = (score: number | string) => {
-  const numScore = Number(score)
-  newDiary.value.moodScore = numScore
-  newDiary.value.moodEmoji = moodEmojis[numScore]
-}
-
-// 加载日记列表
-const loadDiaries = async () => {
-  try {
-    loading.value = true
-    const res = await symptomApi.getList({
-      pageNum: currentPage.value,
-      pageSize: pageSize.value
-    })
-    
-    if (res.code === 200 && res.data) {
-      diaries.value = res.data.records || []
-      total.value = res.data.total || 0
-    }
-  } catch (error) {
-    console.error('Failed to load diaries:', error)
-    ElMessage.error('加载日记失败')
-  } finally {
-    loading.value = false
-  }
-}
-
-// 添加日记
-const handleAddDiary = async () => {
-  if (!newDiary.value.moodScore) {
-    ElMessage.warning('请选择心情评分')
-    return
-  }
-
-  try {
-    submitting.value = true
-    const res = await symptomApi.addRecord(newDiary.value)
-
-    if (res.code === 200) {
-      playSound('write')
-      ElMessage.success('日记保存成功！')
-      showAddDialog.value = false
-      resetForm()
-      loadDiaries()
-    }
-  } catch (error) {
-    console.error('Failed to add diary:', error)
-    ElMessage.error('保存日记失败')
-  } finally {
-    submitting.value = false
-  }
-}
-
-// 查看日记详情
 const viewDiary = async (diary: any) => {
   currentDiary.value = diary
   showDetailDialog.value = true
-  
-  // 加载留言
   await loadComments()
 }
 
-// 重置表单
-const resetForm = () => {
-  newDiary.value = {
-    moodScore: 5,
-    moodEmoji: '😐',
-    title: '',
-    content: '',
-    energyLevel: 5,
-    sleepQuality: 5,
-    stressLevel: 5
-  }
-}
-
-// 加载留言列表
-const loadComments = async () => {
-  if (!currentDiary.value?.id) return
-  
-  try {
-    commentsLoading.value = true
-    const res = await commentApi.getList(currentDiary.value.id, {
-      pageNum: commentsPage.value,
-      pageSize: commentsPageSize.value
-    })
-    
-    if (res.code === 200 && res.data) {
-      // 处理留言数据，添加 liked 字段
-      comments.value = res.data.map((comment: any) => {
-        // 解析 interactions 字段（JSON字符串）
-        let interactions: string[] = []
-        try {
-          interactions = comment.interactions ? JSON.parse(comment.interactions) : []
-        } catch (e) {
-          interactions = []
-        }
-        
-        return {
-          ...comment,
-          liked: interactions.includes('like'),
-          interactionCount: interactions.length
-        }
-      })
-      
-      // TODO: 处理分页
-      hasMoreComments.value = false
-    }
-  } catch (error) {
-    console.error('Failed to load comments:', error)
-    ElMessage.error('加载留言失败')
-  } finally {
-    commentsLoading.value = false
-  }
-}
-
-// 留言添加成功
-const handleCommentSuccess = () => {
-  loadComments()
-}
-
-// 状态修改
-const handleStatusChange = async (newStatus: string) => {
-  if (!currentDiary.value) return
-
-  try {
-    const res = await symptomApi.updateRecord({
-      ...currentDiary.value,
-      status: newStatus
-    })
-
-    if (res.code === 200) {
-      ElMessage.success('状态已更新！')
-      // 刷新日记列表
-      loadDiaries()
-    }
-  } catch (error) {
-    console.error('Failed to update status:', error)
-    ElMessage.error('状态更新失败')
-    // 恢复原来的状态
-    if (currentDiary.value) {
-      const originalDiary = diaries.value.find(d => d.id === currentDiary.value?.id)
-      if (originalDiary) {
-        currentDiary.value.status = originalDiary.status
-      }
-    }
-  }
-}
-
-// 点赞留言
-const handleLikeComment = async (comment: any) => {
-  try {
-    // 切换点赞状态：如果已点赞则取消（传空数组），否则点赞（传['like']）
-    const interactions = comment.liked ? [] : ['like']
-    const res = await commentApi.like(comment.id, interactions)
-    if (res.code === 200) {
-      // 切换点赞状态
-      comment.liked = !comment.liked
-      ElMessage.success(comment.liked ? '点赞成功！' : '已取消点赞')
-    }
-  } catch (error) {
-    console.error('Failed to like comment:', error)
-    ElMessage.error('操作失败')
-  }
-}
-
-// 回复留言
-const handleReplyComment = (comment: any) => {
-  // TODO: 实现回复功能（Phase 2）
-  ElMessage.info('回复功能将在下一阶段开发')
-}
-
-// 删除留言
-const handleDeleteComment = async (comment: any) => {
-  try {
-    const res = await commentApi.delete(comment.id)
-    if (res.code === 200) {
-      ElMessage.success('留言已删除')
-      loadComments()
-    }
-  } catch (error) {
-    console.error('Failed to delete comment:', error)
-    ElMessage.error('删除失败')
-  }
-}
-
-// 加载更多留言
-const loadMoreComments = () => {
-  commentsPage.value++
-  loadComments()
-}
-
-// 获取天气图标
-const getWeatherIcon = (weather: string) => {
-  const icons: Record<string, string> = {
-    sunny: '☀️',
-    cloudy: '⛅',
-    rain: '🌧️',
-    storm: '⛈️',
-    clear: '🌤️'
-  }
-  return icons[weather] || '☀️'
-}
-
-// 获取天气标签
-const getWeatherLabel = (weather: string) => {
-  const labels: Record<string, string> = {
-    sunny: '晴朗',
-    cloudy: '多云',
-    rain: '阴雨',
-    storm: '风暴',
-    clear: '放晴'
-  }
-  return labels[weather] || weather
-}
-
-// 获取状态类型
-const getStatusType = (status: string) => {
-  const types: Record<string, any> = {
-    pending: 'info',
-    processing: 'warning',
-    completed: 'success'
-  }
-  return types[status] || 'info'
-}
-
-// 获取状态标签
-const getStatusLabel = (status: string) => {
-  const labels: Record<string, string> = {
-    pending: '待处理',
-    processing: '处理中',
-    completed: '已完成'
-  }
-  return labels[status] || status
-}
-
-// 格式化时间
-const formatDateTime = (time: string) => {
-  if (!time) return ''
-  const date = new Date(time)
-  return date.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-onMounted(() => {
-  loadDiaries()
-})
+onMounted(() => { loadDiaries() })
 </script>
-
 <style scoped>
 .mood-diary-page {
   position: relative;

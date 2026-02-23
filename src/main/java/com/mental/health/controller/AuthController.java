@@ -74,4 +74,16 @@ public class AuthController {
         // 目前仅返回成功，验证码为固定值 "123456"
         return Result.success("验证码已发送");
     }
+
+    @PostMapping("/reset-password")
+    public Result<String> resetPassword(@RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        String code = request.get("code");
+        String newPassword = request.get("newPassword");
+        boolean success = authService.resetPassword(username, code, newPassword);
+        if (success) {
+            return Result.success("如果账号信息有效，密码已重置");
+        }
+        return Result.error("账号信息或验证码无效");
+    }
 }

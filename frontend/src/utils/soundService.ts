@@ -10,6 +10,7 @@ class SoundService {
   private volume: number = 0.5
   private ambientEnabled: boolean = true
   private interactionEnabled: boolean = true
+  private failedPaths: Set<string> = new Set()
 
   // 环境音文件映射
   private ambientSounds: Record<string, string> = {
@@ -50,29 +51,22 @@ class SoundService {
     this.stopAmbient()
 
     const soundPath = this.ambientSounds[weatherType]
-    if (!soundPath) {
-      console.warn(`No ambient sound found for weather type: ${weatherType}`)
-      return
-    }
+    if (!soundPath || this.failedPaths.has(soundPath)) return
 
     try {
       this.ambientSound = new Howl({
         src: [soundPath],
         loop: true,
         volume: this.volume,
-        html5: true, // 使用HTML5 Audio以减少延迟
-        onloaderror: (id, error) => {
-          console.warn(`Failed to load ambient sound: ${soundPath}`, error)
-        },
-        onplayerror: (id, error) => {
-          console.warn(`Failed to play ambient sound: ${soundPath}`, error)
-        }
+        html5: true,
+        onloaderror: () => { this.failedPaths.add(soundPath) },
+        onplayerror: () => { this.failedPaths.add(soundPath) }
       })
 
       this.ambientSound.play()
       this.currentAmbientType = weatherType
-    } catch (error) {
-      console.error('Error playing ambient sound:', error)
+    } catch {
+      this.failedPaths.add(soundPath)
     }
   }
 
@@ -98,26 +92,18 @@ class SoundService {
     if (!this.interactionEnabled) return
 
     const soundPath = this.interactionSounds[soundType]
-    if (!soundPath) {
-      console.warn(`No interaction sound found for type: ${soundType}`)
-      return
-    }
+    if (!soundPath || this.failedPaths.has(soundPath)) return
 
     try {
       const sound = new Howl({
         src: [soundPath],
-        volume: this.volume * 0.7, // 交互音效音量稍低
-        onloaderror: (id, error) => {
-          console.warn(`Failed to load interaction sound: ${soundPath}`, error)
-        },
-        onplayerror: (id, error) => {
-          console.warn(`Failed to play interaction sound: ${soundPath}`, error)
-        }
+        volume: this.volume * 0.7,
+        onloaderror: () => { this.failedPaths.add(soundPath) },
+        onplayerror: () => { this.failedPaths.add(soundPath) }
       })
-
       sound.play()
-    } catch (error) {
-      console.error('Error playing interaction sound:', error)
+    } catch {
+      this.failedPaths.add(soundPath)
     }
   }
 

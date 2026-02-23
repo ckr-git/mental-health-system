@@ -1,53 +1,44 @@
 <template>
   <el-container class="layout-container">
-    <!-- 侧边栏 -->
-    <el-aside width="240px" class="sidebar">
+    <!-- 桌面侧边栏 -->
+    <el-aside v-if="!isMobile" width="240px" class="sidebar">
       <div class="logo">
         <div class="logo-icon">🛡️</div>
         <h3>管理后台</h3>
       </div>
-
       <el-menu :default-active="activeMenu" router class="sidebar-menu">
-        <el-menu-item index="/admin/dashboard">
-          <div class="menu-icon">📊</div>
-          <span>数据概览</span>
-        </el-menu-item>
-        <el-menu-item index="/admin/users">
-          <div class="menu-icon">👥</div>
-          <span>用户管理</span>
-        </el-menu-item>
-        <el-menu-item index="/admin/doctors">
-          <div class="menu-icon">👨‍⚕️</div>
-          <span>医生管理</span>
-        </el-menu-item>
-        <el-menu-item index="/admin/resources">
-          <div class="menu-icon">📚</div>
-          <span>资源管理</span>
-        </el-menu-item>
-        <el-menu-item index="/admin/appointments">
-          <div class="menu-icon">📅</div>
-          <span>预约管理</span>
-        </el-menu-item>
-        <el-menu-item index="/admin/messages">
-          <div class="menu-icon">🔔</div>
-          <span>消息中心</span>
-        </el-menu-item>
-        <el-menu-item index="/admin/settings">
-          <div class="menu-icon">⚙️</div>
-          <span>系统设置</span>
-        </el-menu-item>
+        <el-menu-item index="/admin/dashboard"><div class="menu-icon">📊</div><span>数据概览</span></el-menu-item>
+        <el-menu-item index="/admin/users"><div class="menu-icon">👥</div><span>用户管理</span></el-menu-item>
+        <el-menu-item index="/admin/doctors"><div class="menu-icon">👨‍⚕️</div><span>医生管理</span></el-menu-item>
+        <el-menu-item index="/admin/resources"><div class="menu-icon">📚</div><span>资源管理</span></el-menu-item>
+        <el-menu-item index="/admin/appointments"><div class="menu-icon">📅</div><span>预约管理</span></el-menu-item>
+        <el-menu-item index="/admin/messages"><div class="menu-icon">🔔</div><span>消息中心</span></el-menu-item>
+        <el-menu-item index="/admin/settings"><div class="menu-icon">⚙️</div><span>系统设置</span></el-menu-item>
       </el-menu>
-
-      <!-- 底部装饰 -->
-      <div class="sidebar-footer">
-        <div class="status-tip">系统运行正常</div>
-      </div>
+      <div class="sidebar-footer"><div class="status-tip">系统运行正常</div></div>
     </el-aside>
+
+    <!-- 移动端抽屉 -->
+    <el-drawer v-model="drawerVisible" direction="ltr" size="240px" :show-close="false" :with-header="false">
+      <div style="margin: -20px -20px 0; height: 72px; display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #5B8DEF, #3D5AFE);">
+        <div style="font-size: 28px;">🛡️</div><h3 style="margin:0;color:#fff;font-size:20px;font-weight:600;">管理后台</h3>
+      </div>
+      <el-menu :default-active="activeMenu" router @select="onMenuSelect" style="border-right:none;padding:12px 0;">
+        <el-menu-item index="/admin/dashboard"><div class="menu-icon">📊</div><span>数据概览</span></el-menu-item>
+        <el-menu-item index="/admin/users"><div class="menu-icon">👥</div><span>用户管理</span></el-menu-item>
+        <el-menu-item index="/admin/doctors"><div class="menu-icon">👨‍⚕️</div><span>医生管理</span></el-menu-item>
+        <el-menu-item index="/admin/resources"><div class="menu-icon">📚</div><span>资源管理</span></el-menu-item>
+        <el-menu-item index="/admin/appointments"><div class="menu-icon">📅</div><span>预约管理</span></el-menu-item>
+        <el-menu-item index="/admin/messages"><div class="menu-icon">🔔</div><span>消息中心</span></el-menu-item>
+        <el-menu-item index="/admin/settings"><div class="menu-icon">⚙️</div><span>系统设置</span></el-menu-item>
+      </el-menu>
+    </el-drawer>
     
     <!-- 主内容区 -->
     <el-container class="main-container">
       <el-header class="header">
         <div class="header-left">
+          <span v-if="isMobile" class="hamburger" @click="drawerVisible = true">☰</span>
           <span class="greeting">{{ getGreeting() }}，{{ userStore.userInfo?.nickname || '管理员' }}</span>
         </div>
         <div class="header-right">
@@ -81,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import { ArrowDown, Setting, SwitchButton } from '@element-plus/icons-vue'
@@ -93,6 +84,12 @@ const route = useRoute()
 const userStore = useUserStore()
 
 const activeMenu = computed(() => route.path)
+const isMobile = ref(window.innerWidth <= 768)
+const drawerVisible = ref(false)
+const onResize = () => { isMobile.value = window.innerWidth <= 768 }
+onMounted(() => window.addEventListener('resize', onResize))
+onUnmounted(() => window.removeEventListener('resize', onResize))
+const onMenuSelect = () => { if (isMobile.value) drawerVisible.value = false }
 
 const getGreeting = () => {
   const hour = new Date().getHours()
@@ -249,5 +246,12 @@ const handleCommand = async (command: string) => {
   background: #FAFAFA;
   padding: 24px;
   overflow-y: auto;
+}
+
+.hamburger {
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 12px;
+  color: #636E72;
 }
 </style>

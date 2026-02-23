@@ -48,6 +48,7 @@
           </el-button>
         </el-form-item>
         <div class="links">
+          <router-link to="/forgot-password">忘记密码？</router-link>
           <router-link to="/register">还没有账号？立即注册</router-link>
         </div>
       </el-form>
@@ -208,7 +209,8 @@ const handleLogin = async () => {
 }
 
 .links {
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
   margin-top: 16px;
 }
 

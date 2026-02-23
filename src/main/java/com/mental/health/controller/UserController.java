@@ -185,8 +185,10 @@ public class UserController {
     @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR', 'ADMIN')")
     public Result<IPage<User>> getDoctorList(
             @RequestParam(defaultValue = "1") int pageNum,
-            @RequestParam(defaultValue = "10") int pageSize) {
-        IPage<User> doctors = userService.getDoctorList(pageNum, pageSize);
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String specialty,
+            @RequestParam(required = false) String keyword) {
+        IPage<User> doctors = userService.getDoctorList(pageNum, pageSize, specialty, keyword);
         return Result.success(doctors);
     }
 

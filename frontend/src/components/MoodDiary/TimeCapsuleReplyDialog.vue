@@ -72,7 +72,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import request from '@/utils/request'
+import { capsuleApi } from '@/api'
 
 // Props
 const props = defineProps<{
@@ -150,7 +150,7 @@ const handleSubmit = async () => {
 
   try {
     submitting.value = true
-    const res = await request.post(`/patient/time-capsule/reply/${props.letter.id}`, {
+    const res = await capsuleApi.reply(props.letter.id, {
       replyContent: replyContent.value
     })
 

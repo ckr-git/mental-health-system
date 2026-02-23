@@ -155,12 +155,19 @@ public class UserService {
     /**
      * 获取医生列表
      */
-    public IPage<User> getDoctorList(int pageNum, int pageSize) {
+    public IPage<User> getDoctorList(int pageNum, int pageSize, String specialty, String keyword) {
         Page<User> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(User::getRole, "DOCTOR")
-                .eq(User::getStatus, 1)
-                .orderByDesc(User::getCreateTime);
+                .eq(User::getStatus, 1);
+        if (StringUtils.hasText(specialty)) {
+            queryWrapper.eq(User::getSpecialization, specialty);
+        }
+        if (StringUtils.hasText(keyword)) {
+            queryWrapper.and(w -> w.like(User::getNickname, keyword)
+                    .or().like(User::getUsername, keyword));
+        }
+        queryWrapper.orderByDesc(User::getCreateTime);
         return userMapper.selectPage(page, queryWrapper);
     }
 

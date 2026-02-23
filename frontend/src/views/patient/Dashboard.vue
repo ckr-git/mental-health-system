@@ -92,8 +92,8 @@
           <el-timeline>
             <el-timeline-item v-for="record in recentRecords" :key="record.id" :timestamp="record.createTime" placement="top">
               <el-card>
-                <h4>{{ record.symptomType }}</h4>
-                <p>{{ record.description }}</p>
+                <h4>{{ record.title || record.symptomType }}</h4>
+                <p>{{ record.content || record.description }}</p>
               </el-card>
             </el-timeline-item>
           </el-timeline>

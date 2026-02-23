@@ -153,215 +153,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
-import { ElMessage } from 'element-plus'
 import { Edit, HomeFilled, Lock } from '@element-plus/icons-vue'
 import TreeHoleEditor from '@/components/MoodDiary/TreeHoleEditor.vue'
 import TreeHoleCard from '@/components/MoodDiary/TreeHoleCard.vue'
 import TreeHoleDetail from '@/components/MoodDiary/TreeHoleDetail.vue'
-import request from '@/utils/request'
+import { useTreeHole } from './tree-hole/useTreeHole'
 
-// 状态
-const activeTab = ref('active')
-const loading = ref(false)
-const showEditor = ref(false)
-const showDetail = ref(false)
-const selectedId = ref<number>()
-const showArchive = ref(false)  // 是否显示档案馆
-const activeCategories = ref<string[]>([])  // 展开的分类
+const {
+  activeTab, loading, showEditor, showDetail, selectedId,
+  showArchive, activeCategories,
+  activeTreeHoles, canViewArchive,
+  currentPage, pageSize, total,
+  totalArchiveCount, archivedCategories, stats,
+  loadActiveTreeHoles, handleTabChange, handleEditorSuccess,
+  handleView, handleDelete, handleArchiveDelete,
+  getFireflyStyle, getLeafStyle
+} = useTreeHole()
 
-// 数据
-const activeTreeHoles = ref<any[]>([])
-const archiveTreeHoles = ref<any[]>([])
-const archiveData = ref<Record<string, any[]>>({})  // 原始档案数据
-const canViewArchive = ref(false)
-const statsData = ref<Record<string, number>>({})
-
-// 分页
-const currentPage = ref(1)
-const pageSize = ref(9)
-const total = ref(0)
-
-// 档案馆统计
-const totalArchiveCount = computed(() => {
-  return Object.values(archiveData.value).reduce((sum, arr) => sum + arr.length, 0)
-})
-
-// 倾诉对象图标映射
-const speakToIconMap: Record<string, string> = {
-  'self': '🧘',
-  'person': '👤',
-  'role': '🎭',
-  'thing': '🎈',
-  'custom': '✨'
-}
-
-// 档案分类数据
-const archivedCategories = computed(() => {
-  const categories: any[] = []
-
-  for (const [key, holes] of Object.entries(archiveData.value)) {
-    if (holes && holes.length > 0) {
-      // 解析key: "speakToType:speakToName"
-      const [type, name] = key.split(':')
-      categories.push({
-        key,
-        displayName: name || '未分类',
-        icon: speakToIconMap[type] || '💬',
-        count: holes.length,
-        holes: holes.sort((a, b) =>
-          new Date(b.createTime).getTime() - new Date(a.createTime).getTime()
-        )
-      })
-    }
-  }
-
-  // 按倾诉数量降序排列
-  return categories.sort((a, b) => b.count - a.count)
-})
-
-// 统计数据
-const stats = computed(() => {
-  const total = activeTreeHoles.value.length + archiveTreeHoles.value.length
-  const active = activeTreeHoles.value.length
-  return { total, active }
-})
-
-// 生命周期
-onMounted(() => {
-  loadActiveTreeHoles()
-  checkArchivePermission()
-})
-
-// 监听档案馆显示状态
-watch(showArchive, (newVal) => {
-  if (newVal && canViewArchive.value) {
-    loadArchive()
-  }
-})
-
-// 加载活跃树洞
-const loadActiveTreeHoles = async () => {
-  try {
-    loading.value = true
-    const res = await request.get('/patient/tree-hole/active')
-
-    if (res.code === 200) {
-      activeTreeHoles.value = res.data || []
-    }
-  } catch (error: any) {
-    console.error('Failed to load active tree holes:', error)
-    ElMessage.error('加载失败')
-  } finally {
-    loading.value = false
-  }
-}
-
-// 检查档案馆权限
-const checkArchivePermission = async () => {
-  try {
-    const res = await request.get('/patient/tree-hole/can-view-archive')
-    if (res.code === 200) {
-      canViewArchive.value = res.data
-    }
-  } catch (error) {
-    console.error('Failed to check archive permission:', error)
-  }
-}
-
-// 加载档案馆
-const loadArchive = async () => {
-  if (!canViewArchive.value) {
-    return
-  }
-
-  try {
-    loading.value = true
-    const res = await request.get('/patient/tree-hole/archive')
-
-    if (res.code === 200) {
-      // 保存原始分组数据（不展平）
-      archiveData.value = res.data || {}
-
-      // 也展平保存到archiveTreeHoles用于兼容
-      archiveTreeHoles.value = Object.values(archiveData.value).flat()
-    }
-  } catch (error: any) {
-    console.error('Failed to load archive:', error)
-    ElMessage.error(error.response?.data?.message || '加载档案馆失败')
-  } finally {
-    loading.value = false
-  }
-}
-
-// 切换标签页
-const handleTabChange = (tabName: string) => {
-  if (tabName === 'archive' && canViewArchive.value) {
-    loadArchive()
-  }
-}
-
-// 编辑器成功回调
-const handleEditorSuccess = () => {
-  loadActiveTreeHoles()
-  checkArchivePermission()
-}
-
-// 查看详情
-const handleView = (id: number) => {
-  selectedId.value = id
-  showDetail.value = true
-}
-
-// 删除记录
-const handleDelete = async (id: number) => {
-  try {
-    const res = await request.delete(`/patient/tree-hole/delete/${id}`)
-
-    if (res.code === 200) {
-      ElMessage.success('删除成功')
-      loadActiveTreeHoles()
-      if (showArchive.value) {
-        loadArchive()
-      }
-    } else {
-      ElMessage.error(res.message || '删除失败')
-    }
-  } catch (error: any) {
-    console.error('Failed to delete tree hole:', error)
-    ElMessage.error(error.response?.data?.message || '删除失败')
-  }
-}
-
-// 删除档案记录
-const handleArchiveDelete = async (id: number) => {
-  await handleDelete(id)
-}
-
-// 萤火虫位置样式
-const getFireflyStyle = (index: number) => {
-  const positions = [
-    { left: '20%', top: '30%', animationDelay: '0s' },
-    { left: '60%', top: '50%', animationDelay: '1s' },
-    { left: '80%', top: '40%', animationDelay: '2s' },
-    { left: '40%', top: '70%', animationDelay: '1.5s' },
-    { left: '90%', top: '60%', animationDelay: '2.5s' }
-  ]
-  return positions[index - 1]
-}
-
-// 树叶位置样式
-const getLeafStyle = (index: number) => {
-  const positions = [
-    { left: '10%', animationDelay: '0s', animationDuration: '10s' },
-    { left: '30%', animationDelay: '3s', animationDuration: '12s' },
-    { left: '50%', animationDelay: '6s', animationDuration: '11s' },
-    { left: '70%', animationDelay: '9s', animationDuration: '13s' },
-    { left: '85%', animationDelay: '4s', animationDuration: '10s' },
-    { left: '95%', animationDelay: '7s', animationDuration: '14s' }
-  ]
-  return positions[index - 1]
-}
 </script>
 
 <style scoped lang="scss">

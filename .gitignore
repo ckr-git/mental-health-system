@@ -68,3 +68,7 @@ application-prod.yml
 
 # Backend log
 backend.log
+
+# Claude Code
+.claude/
+.mcp.json

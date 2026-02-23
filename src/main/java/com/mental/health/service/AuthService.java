@@ -123,6 +123,18 @@ public class AuthService {
         return result;
     }
 
+    public boolean resetPassword(String username, String code, String newPassword) {
+        if (username == null || code == null || newPassword == null) return false;
+        LambdaQueryWrapper<User> qw = new LambdaQueryWrapper<>();
+        qw.eq(User::getUsername, username);
+        User user = userMapper.selectOne(qw);
+        if (user == null || !"123456".equals(code)) return false;
+        user.setPassword(passwordEncoder.encode(newPassword));
+        boolean ok = userMapper.updateById(user) > 0;
+        if (ok) loginAttemptService.loginSucceeded(username);
+        return ok;
+    }
+
     private Map<String, Object> getUserInfo(User user) {
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("id", user.getId());

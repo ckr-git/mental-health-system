@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { isTokenExpired } from '@/utils/jwt'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,6 +18,11 @@ const router = createRouter({
       path: '/register',
       name: 'Register',
       component: () => import('@/views/Register.vue')
+    },
+    {
+      path: '/forgot-password',
+      name: 'ForgotPassword',
+      component: () => import('@/views/ForgotPassword.vue')
     },
     // 患者端路由
     {
@@ -202,8 +208,10 @@ router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
   
   if (to.meta.requiresAuth) {
-    if (!userStore.token) {
+    if (!userStore.token || isTokenExpired(userStore.token)) {
+      userStore.logout()
       next('/login')
+      return
     } else if (to.meta.role && userStore.userInfo?.role !== to.meta.role) {
       // 角色不匹配，重定向到对应角色的首页
       const role = userStore.userInfo?.role
