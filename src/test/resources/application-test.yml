@@ -1,0 +1,39 @@
+# 测试环境配置
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+  sql:
+    init:
+      mode: always
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+jwt:
+  secret: test-secret-key-for-unit-testing-only-12345678
+  expiration: 86400
+
+ai:
+  mock:
+    enabled: true
+
+security:
+  login:
+    max-attempts: 5
+    lock-duration: 300
+
+logging:
+  level:
+    com.mental.health: debug

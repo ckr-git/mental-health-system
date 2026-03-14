@@ -1,0 +1,63 @@
+// ============================================
+// 全局样式 - Global Styles
+// ============================================
+
+@use './theme.scss' as *;
+
+// CSS 变量
+:root {
+  --primary-color: #{$primary-color};
+  --secondary-color: #{$secondary-color};
+  --accent-color: #{$accent-color};
+  --success-color: #{$success-color};
+  --warning-color: #{$warning-color};
+  --danger-color: #{$danger-color};
+  --info-color: #{$info-color};
+
+  --bg-primary: #{$bg-primary};
+  --bg-secondary: #{$bg-secondary};
+  --bg-card: #{$bg-card};
+
+  --text-primary: #{$text-primary};
+  --text-secondary: #{$text-secondary};
+  --text-muted: #{$text-muted};
+
+  --border-color: #{$border-color};
+  --radius-md: #{$radius-md};
+  --shadow-md: #{$shadow-md};
+}
+
+// 重置样式
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: $font-family;
+  font-size: $font-base;
+  color: $text-primary;
+  background-color: $bg-primary;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+// 滚动条美化
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  &:hover {
+    background: rgba(0, 0, 0, 0.25);
+  }
+}
