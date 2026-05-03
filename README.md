@@ -1,8 +1,8 @@
 ﻿# 智能心理健康管理系统
 
-> 基于 Spring Boot 3 + Vue 3 + MySQL 的多角色心理健康平台，聚合 AI 咨询、情绪日记、主题房间、医患沟通与后台运营能力。
+> 基于 Spring Boot 3 + Vue 3 + MySQL 的多角色心理健康平台，聚合 AI 咨询、情绪日记、心理评估、危机干预、治疗计划、医患沟通与后台运营能力。
 
-**最后更新**: 2026-02-23 | **版本**: v1.3
+**最后更新**: 2026-05-03 | **版本**: v2.0
 
 ---
 
@@ -10,15 +10,15 @@
 
 | 类别 | 数量 | 说明 |
 |------|------|------|
-| Java 类文件 | 105 | 后端业务逻辑实现 |
-| Entity 实体类 | 25 | 数据模型定义 |
-| Controller 控制器 | 22 | REST API 端点 |
-| Service 服务类 | 22 | 核心业务逻辑 |
-| Mapper 接口 | 23 | MyBatis-Plus 数据访问层 |
-| Vue 页面 | 31 | 患者12 + 医生8 + 管理员8 + 公共3 |
-| Vue 组件 | 24 | 可复用 UI 组件 |
-| 数据库表 | 20+ | 核心业务数据存储 |
-| API 接口 | 100+ | RESTful API 端点 |
+| Java 类文件 | 286 | 后端业务逻辑实现 |
+| Entity 实体类 | 81 | 数据模型定义 |
+| Controller 控制器 | 43 | REST API 端点 |
+| Service 服务类 | 53 | 核心业务逻辑 |
+| Mapper 接口 | 79 | MyBatis-Plus 数据访问层 |
+| Vue 页面 | 37 | 患者15 + 医生11 + 管理员8 + 公共3 |
+| Vue 组件 | 25 | 可复用 UI 组件 |
+| 数据库迁移 | 17 | Flyway 增量迁移脚本 |
+| 测试文件 | 7 | 后端单元测试 + E2E 测试 |
 
 ---
 
@@ -50,9 +50,9 @@
 
 | 角色 | 账号 | 密码 | 功能说明 |
 |------|------|------|----------|
-| **患者** | 患者1 | 123456 | 情绪日记、AI咨询、时间胶囊、心情树洞 |
-| **医生** | ooo | 123456 | 患者管理、评估报告、患者公海认领 |
-| **管理员** | admin | 123456 | 用户管理、系统设置、审批管理 |
+| **患者** | patient001 | 123456 | 情绪日记、AI咨询、心理评估、冥想训练、时间胶囊、心情树洞 |
+| **医生** | doctor001 | 123456 | 患者管理、评估报告、排班设置、治疗计划、危机告警 |
+| **管理员** | admin | 123456 | 用户管理、系统设置、审批管理、数据统计 |
 
 ### 快速启动
 
@@ -67,7 +67,7 @@ npm install
 npm run dev
 
 # 3. 访问地址
-# 前端: http://localhost:3000 或 http://localhost:5173
+# 前端: http://localhost:5173
 # 后端: http://localhost:8080
 ```
 
@@ -116,26 +116,31 @@ npm run dev
 
 ## 核心功能地图
 
-### 患者体验 (12个页面)
+### 患者体验 (15个页面)
 
 - **账号体系**：注册/登录/注销、个人资料维护、修改密码、医生名录浏览 (`UserController`)。
 - **情绪与症状追踪**：`MoodDiaryController` / `SymptomRecordController` 支持写日记、管理症状、查看历史、统计最近 7/30 天趋势以及天气背景自动匹配。
-- **互动社区**：`MoodCommentController` 允许在情绪日记下评论、表态并计入主题解锁数据；`TreeHoleController` 提供条件解锁、心情阈值控制的树洞记录，后台定期清理过期内容。
-- **时间胶囊**：`TimeCapsuleController` 负责写信、定时解锁、AI 推荐信件类型、回信与阅读历史；`TimeCapsuleService` 自动检查可解锁条目并记录情绪触发信息。
-- **房间与主题**：`RoomDecorationController` + `UserThemeConfigService` 搭建 13+ 装饰、8 套主题的收藏、拖拽、解锁与白/黑天光模式统计，配合 `soundService.ts`、`hapticService.ts` 提升沉浸感。
-- **AI 服务**：`AIController` 面向问答、聊天记录、赞踩反馈以及 AI 生成综合评估报告（拉取最近日记作为上下文，支持 DashScope 和 mock）。
-- **资源推荐**：`RecommendationController` 联合 `CollaborativeFiltering` 算法与 `mental_resource` / `resource_view_record` 数据，推送文章、音频、视频等内容并记录交互行为。
-- **医患沟通**：`ChatController` + WebSocket 支持实时沟通，患者端 `Chat.vue` / `Communication.vue` 搭配 STOMP 订阅、状态提示。
+- **心理评估**：`AssessmentAssignmentController` 支持量表评估、评估历史、维度分析和基线对比。
+- **冥想训练**：`MeditationPrescriptionController` 提供冥想练习处方、效果记录和统计。
+- **互动社区**：`MoodCommentController` 允许在情绪日记下评论、表态并计入主题解锁数据；`TreeHoleController` 提供条件解锁、心情阈值控制的树洞记录。
+- **时间胶囊**：`TimeCapsuleController` 负责写信、定时解锁、AI 推荐信件类型、回信与阅读历史。
+- **房间与主题**：`RoomDecorationController` + `UserThemeConfigService` 搭建 13+ 装饰、8 套主题的收藏、拖拽、解锁与白/黑天光模式统计。
+- **AI 服务**：`AiSessionController` 面向问答、聊天记录、赞踩反馈以及 AI 生成综合评估报告。
+- **资源推荐**：`RecommendationController` 联合 `CollaborativeFiltering` 算法推送文章、音频、视频等内容。
+- **医患沟通**：`ChatController` + WebSocket 支持实时沟通，患者端 `Chat.vue` / `Communication.vue` 搭配 STOMP 订阅。
+- **预约管理**：`AppointmentController` 支持预约创建、候补排队 (`WaitlistManagementController`)。
 
-### 医生工作台 (8个页面)
+### 医生工作台 (11个页面)
 
-- `DoctorController` 聚合仪表盘统计（患者数、今日/待处理会话、报告数量）、患者分页、患者详情（最近日记、症状等）与报告列表。
+- `DoctorController` 聚合仪表盘统计（患者数、今日/待处理会话、报告数量）、患者分页、患者详情与报告列表。
 - **患者公海**：浏览未分配医生的患者列表，支持关键词搜索和分页。
-- **患者认领**：医生可提交认领申请，填写认领理由，等待管理员审核。
-- **患者释放**：对现有患者发起释放申请，解除医患关系，患者回归公海。
+- **患者认领/释放**：医生可提交认领申请或释放患者，等待管理员审核。
 - **在线咨询管理**：查看所有咨询会话、按状态筛选、结束会话、统计会话时长。
-- 支持创建/编辑/删除评估报告、查看单条报告、筛查患者报告数据，并获取近期预约列表。
-- `/api/doctor/appointments` 提供医生视角的预约查询与统计，保证医生仅能查看所属患者数据。
+- **危机告警**：`CrisisCaseController` 管理危机案例，支持状态流转（升级/解决）、联系记录和升级步骤。
+- **排班设置**：每周排班、特殊日期设置和我的预约管理。
+- **治疗计划**：`TreatmentPlanPhaseController` 支持创建/编辑治疗计划、阶段管理和评审记录。
+- **转介管理**：`ReferralController` 支持患者转介、交接记录和护理团队管理。
+- 支持创建/编辑/删除评估报告、查看单条报告、筛查患者报告数据。
 
 ### 管理员能力 (8个页面)
 
@@ -389,28 +394,34 @@ jwt.expiration: 86400  # 24小时
 - Register (注册)
 - ForgotPassword (忘记密码)
 
-**患者端 (12个页面):**
+**患者端 (15个页面):**
 - Dashboard (工作台)
 - MoodDiary (情绪日记)
 - TimeCapsule (时间胶囊)
 - TreeHole (心情树洞)
 - RoomDecoration (房间装饰)
 - Resources (心理资源)
+- Meditation (冥想训练)
+- Assessments (心理评估)
 - AIChat (AI咨询)
 - Reports (评估报告)
 - Doctors (医生列表)
 - Chat (实时沟通)
-- Communication (通讯)
+- Communication (医患沟通)
+- Appointments (预约管理)
 - Profile (个人中心)
 
-**医生端 (8个页面):**
+**医生端 (11个页面):**
 - Dashboard (工作台)
 - Patients (患者管理)
 - PatientPool (患者公海)
 - Reports (评估报告)
 - Chat (患者沟通)
 - Appointments (预约管理)
-- Consultations (咨询管理)
+- Scheduling (排班设置)
+- TreatmentPlans (治疗计划)
+- Consultation (咨询管理)
+- CrisisAlerts (危机告警)
 - Profile (个人中心)
 
 **管理员端 (8个页面):**
@@ -550,27 +561,20 @@ jwt.expiration: 86400  # 24小时
 - [x] 系统通知与公告
 - [x] 多角色布局（患者/医生/管理员）
 
-### 待完善功能 (⏳)
+### 待完善功能
 
 - [ ] **视频/语音咨询**：当前仅支持文字聊天
-- [ ] **医生排班系统**：暂无排班功能
 - [ ] **支付系统**：咨询付费功能未实现
 - [ ] **消息推送**：缺少实时消息推送（如邮件/短信通知）
 - [ ] **数据导出**：报告和统计数据的 PDF/Excel 导出
-- [ ] **移动端适配**：响应式设计有待优化
 - [ ] **国际化**：仅支持中文
 - [ ] **Docker 部署**：Dockerfile 待完善
-- [ ] **单元测试覆盖**：测试覆盖率较低
 - [ ] **性能监控**：APM 工具集成
-- [ ] **日志聚合**：ELK Stack 集成
-- [ ] **API 文档**：Swagger/OpenAPI 文档自动生成
 
 ### 已知问题
 
-1. ~~**Profile 页面导入错误**~~：已在 v1.3 修复
-2. **医生端咨询详情**：`/api/doctor/consultations/{sessionId}` 接口返回 "功能暂未实现"
-3. **心理测评表**：数据库表已创建但 UI 未实现
-4. **Redis 缓存**：配置预留但未启用
+1. **Redis 缓存**：配置预留但未启用
+2. **AI Mock 模式**：默认开启，生产环境需配置真实 API Key
 
 ---
 
@@ -586,6 +590,31 @@ jwt.expiration: 86400  # 24小时
 ---
 
 ## 更新日志
+
+### v2.0 (2026-05-03)
+
+**全面功能升级:**
+- 新增心理评估模块：量表评估、维度分析、基线对比、评估分配
+- 新增冥想训练模块：冥想处方、效果记录、练习统计
+- 新增危机干预模块：危机案例管理、状态流转、升级步骤、联系记录
+- 新增治疗计划模块：阶段管理、评审记录、版本修订
+- 新增医生排班系统：每周排班、特殊日期、预约时段管理
+- 新增转介管理：患者转介、交接记录、护理团队
+- 新增候补排队：预约候补、时段锁定、自动通知
+- 新增通知策略：通知模板、投递记录、偏好设置
+- 新增数据分析引擎：聚合统计、工作负载快照、患者每日指标
+
+**安全修复:**
+- 用户 API 不再返回 password 字段（@JsonProperty WRITE_ONLY）
+- 登录失败错误提示由响应拦截器统一处理，移除冗余 console.error
+- 预约状态映射补全（状态值 4 正确显示"已过期"）
+- 消息管理 ElTag warning 修复
+
+**项目规模:**
+- 后端从 105 个 Java 类扩展到 286 个
+- 实体类从 24 个扩展到 81 个
+- 新增 17 个数据库迁移脚本
+- 前端页面从 31 个扩展到 37 个（患者+3、医生+3）
 
 ### v1.3 (2026-02-23)
 
@@ -651,5 +680,5 @@ jwt.expiration: 86400  # 24小时
 
 **项目维护者**: Claude Code
 **技术支持**: Spring Boot 3 + Vue 3 + MySQL
-**文档版本**: v1.3
-**最后更新**: 2026-02-23
+**文档版本**: v2.0
+**最后更新**: 2026-05-03

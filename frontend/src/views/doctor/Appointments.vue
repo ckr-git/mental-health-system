@@ -10,6 +10,7 @@
               <el-option label="已确认" :value="1" />
               <el-option label="已完成" :value="2" />
               <el-option label="已取消" :value="3" />
+              <el-option label="已过期" :value="4" />
             </el-select>
             <el-button type="primary" size="small" @click="handleFilter">查询</el-button>
           </div>
@@ -82,6 +83,8 @@ const statusText = (status: number) => {
       return '已完成'
     case 3:
       return '已取消'
+    case 4:
+      return '已过期'
     default:
       return '未知'
   }
@@ -96,6 +99,8 @@ const statusType = (status: number) => {
     case 2:
       return 'success'
     case 3:
+      return 'danger'
+    case 4:
       return 'danger'
     default:
       return 'info'

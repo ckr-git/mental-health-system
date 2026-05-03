@@ -131,4 +131,50 @@ export const treatmentApi = {
 
   getMyPlanDetail: (id: number) =>
     request.get<any, ApiResponse<PlanDetailDTO>>(`/patient/treatment-plans/${id}`),
+
+  // ===== Phase 2: 阶段化 =====
+  getPlanPhases: (planId: number) =>
+    request.get<any, ApiResponse<any[]>>(`/doctor/treatment-plans/${planId}/phases`),
+
+  initPlanPhases: (planId: number) =>
+    request.post<any, ApiResponse<void>>(`/doctor/treatment-plans/${planId}/phases/init`),
+
+  activatePhase: (planId: number, phaseId: number) =>
+    request.post<any, ApiResponse<void>>(`/doctor/treatment-plans/${planId}/phases/${phaseId}/activate`),
+
+  completePhase: (planId: number, phaseId: number, note: string) =>
+    request.post<any, ApiResponse<void>>(`/doctor/treatment-plans/${planId}/phases/${phaseId}/complete`, { note }),
+
+  // 评审
+  getPlanReviews: (planId: number, status?: string) =>
+    request.get<any, ApiResponse<any[]>>(`/doctor/treatment-plans/${planId}/reviews`, { params: { status } }),
+
+  createReview: (planId: number, data: { phaseId?: number; dueAt?: string }) =>
+    request.post<any, ApiResponse<number>>(`/doctor/treatment-plans/${planId}/reviews`, data),
+
+  completeReview: (reviewId: number, data: { conclusionCode: string; summaryText: string }) =>
+    request.post<any, ApiResponse<void>>(`/doctor/treatment-plan-reviews/${reviewId}/complete`, data),
+
+  // 修订
+  proposeRevision: (planId: number, data: { changeSummary: string; reason: string }) =>
+    request.post<any, ApiResponse<number>>(`/doctor/treatment-plans/${planId}/revisions`, data),
+
+  approveRevision: (revisionId: number) =>
+    request.post<any, ApiResponse<void>>(`/doctor/treatment-plan-revisions/${revisionId}/approve`),
+
+  // 干预任务
+  assignTask: (patientId: number, data: any) =>
+    request.post<any, ApiResponse<number>>(`/doctor/patients/${patientId}/intervention-tasks`, data),
+
+  reviewTask: (taskId: number, data: { resultCode: string; note: string }) =>
+    request.post<any, ApiResponse<void>>(`/doctor/intervention-tasks/${taskId}/review`, data),
+
+  getPlanTasks: (planId: number) =>
+    request.get<any, ApiResponse<any[]>>(`/doctor/treatment-plans/${planId}/tasks`),
+
+  getMyTasks: (status?: string) =>
+    request.get<any, ApiResponse<any[]>>('/patient/intervention-tasks', { params: { status } }),
+
+  submitTask: (taskId: number, data: { note: string; value?: string }) =>
+    request.post<any, ApiResponse<void>>(`/patient/intervention-tasks/${taskId}/submit`, data),
 }

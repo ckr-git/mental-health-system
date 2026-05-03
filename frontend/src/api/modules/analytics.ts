@@ -52,4 +52,29 @@ export const analyticsApi = {
   // Admin
   getSystemAnalytics: () =>
     request.get<any, ApiResponse<any>>('/admin/analytics'),
+
+  // ===== Phase 3: 多维分析 =====
+
+  // 患者轨迹(医生端)
+  getPatientTrajectory: (patientId: number, from: string, to: string) =>
+    request.get<any, ApiResponse<any[]>>(`/doctor/patients/${patientId}/trajectory`, { params: { from, to } }),
+
+  // 医生工作负载(管理端)
+  getDoctorWorkload: (doctorId: number, from: string, to: string) =>
+    request.get<any, ApiResponse<any[]>>(`/admin/analytics/doctors/${doctorId}/workload`, { params: { from, to } }),
+
+  // 手动触发聚合
+  triggerAnalyticsJob: (data: { jobScopeCode: string; targetDate: string }) =>
+    request.post<any, ApiResponse<number>>('/admin/analytics/jobs', data),
+
+  // 日记洞察(患者端)
+  getDiaryInsight: (diaryId: number) =>
+    request.get<any, ApiResponse<any>>(`/patient/mood-diaries/${diaryId}/insights`),
+
+  // 日记洞察(医生端)
+  getMoodInsightSummary: (patientId: number, days = 14) =>
+    request.get<any, ApiResponse<any>>(`/doctor/patients/${patientId}/mood-insights/summary`, { params: { days } }),
+
+  getMoodInsightTimeline: (patientId: number, from: string, to: string) =>
+    request.get<any, ApiResponse<any[]>>(`/doctor/patients/${patientId}/mood-insights/timeline`, { params: { from, to } }),
 }

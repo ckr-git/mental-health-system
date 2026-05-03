@@ -5,7 +5,7 @@ export const notificationTypeTagMap: Record<string, string> = {
   SYSTEM: 'primary', PERSONAL: 'success', BROADCAST: 'warning'
 }
 export const priorityTagMap: Record<string, string> = {
-  LOW: 'info', NORMAL: '', HIGH: 'warning', URGENT: 'danger'
+  LOW: 'info', NORMAL: 'primary', HIGH: 'warning', URGENT: 'danger'
 }
 export const feedbackTypeMap: Record<string, string> = {
   BUG: 'Bug报告', FEATURE: '功能建议', COMPLAINT: '投诉', OTHER: '其他'

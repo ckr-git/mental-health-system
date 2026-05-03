@@ -22,6 +22,16 @@ public class UserNotification implements Serializable {
     private String actionPayload;
     private String sourceType;
     private Long sourceId;
+    private String templateCode;
+    private Integer mustAck;
+    private LocalDateTime ackDeadline;
+    private LocalDateTime ackedAt;
+    private String deliveryStatus;
+    private String coalescedKey;
+    private Integer coalescedCount;
+    private String escalationStatus;
+    @Version
+    private Integer version;
     private Integer readStatus;
     private LocalDateTime readTime;
 

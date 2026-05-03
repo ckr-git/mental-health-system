@@ -1,7 +1,10 @@
 package com.mental.health.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -17,6 +20,9 @@ public class User implements Serializable {
     private Long id;
 
     private String username;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private String nickname;
     private String avatar;

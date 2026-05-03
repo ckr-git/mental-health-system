@@ -67,6 +67,47 @@ public class Appointment implements Serializable {
     private LocalDateTime cancelTime;
 
     /**
+     * 到诊状态: PENDING,CHECKED_IN,COMPLETED,NO_SHOW,LATE_CANCEL
+     */
+    private String attendanceStatus;
+
+    /**
+     * 签到时间
+     */
+    private LocalDateTime checkInTime;
+
+    /**
+     * 取消人ID
+     */
+    private Long cancelledBy;
+
+    /**
+     * 改约来源预约ID
+     */
+    private Long rescheduledFromId;
+
+    /**
+     * 优先级: NORMAL,URGENT,FOLLOWUP,CRISIS
+     */
+    private String priorityCode;
+
+    /**
+     * 来源: ADMIN,PATIENT,DOCTOR,WAITLIST
+     */
+    private String source;
+
+    /**
+     * 候补ID
+     */
+    private Long waitlistId;
+
+    /**
+     * 预约类型字段兼容（数据库用appointment_type，此字段仅用于兼容旧代码）
+     */
+    @TableField(exist = false)
+    private String type;
+
+    /**
      * 确认时间
      */
     private LocalDateTime confirmTime;

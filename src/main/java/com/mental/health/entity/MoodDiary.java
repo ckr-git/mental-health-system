@@ -24,6 +24,14 @@ public class MoodDiary implements Serializable {
     private String title;
     private String content;
 
+    // Phase 3: 日记洞察
+    private java.math.BigDecimal sentimentScore;
+    private String featureStatus;  // PENDING,SUCCESS,FAILED
+    private String emotionTagsJson;
+    private String triggerTagsJson;
+    private String copingTagsJson;
+    private String aiSummary;
+
     // 多维度评分
     private Integer energyLevel;
     private Integer sleepQuality;

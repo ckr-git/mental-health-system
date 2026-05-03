@@ -96,8 +96,8 @@ const handleLogin = async () => {
         // 根据角色跳转
         const role = res.data.userInfo.role.toLowerCase()
         router.push(`/${role}`)
-      } catch (error) {
-        console.error('Login failed:', error)
+      } catch {
+        // error toast already shown by response interceptor
       } finally {
         loading.value = false
       }

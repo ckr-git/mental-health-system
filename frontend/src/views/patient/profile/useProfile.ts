@@ -3,7 +3,7 @@ import { ElMessage } from 'element-plus'
 import { userApi, authApi, profileApi } from '@/api'
 import { useUserStore } from '@/stores/user'
 import { soundService, setSoundEnabled, setVolume } from '@/utils/soundService'
-import type { ProfileAggregate, UpdateProfileCommand } from '@/types'
+import type { UpdateProfileCommand } from '@/types'
 
 export function useProfile() {
   const userStore = useUserStore()
@@ -100,6 +100,18 @@ export function useProfile() {
 
       const res = await profileApi.updateAggregateProfile(cmd)
       if (res.code === 200) {
+        userStore.setUserInfo({
+          ...(userStore.userInfo || { id: userInfo.value.userId, username: userInfo.value.username, role: userInfo.value.role }),
+          nickname: cmd.nickname || userInfo.value.nickname || '',
+          avatar: userInfo.value.avatar,
+          phone: cmd.phone || userInfo.value.phone,
+          email: cmd.email || userInfo.value.email,
+          gender: cmd.gender ?? userInfo.value.gender,
+          age: cmd.age ?? userInfo.value.age,
+          username: userInfo.value.username,
+          id: userInfo.value.userId,
+          role: userInfo.value.role
+        })
         ElMessage.success('保存成功')
         editing.value = false
         loadProfile()

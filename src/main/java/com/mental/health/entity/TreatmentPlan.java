@@ -20,12 +20,18 @@ public class TreatmentPlan implements Serializable {
     private String diagnosis;
     /** DRAFT, ACTIVE, PAUSED, COMPLETED, ARCHIVED */
     private String planStatus;
+    private Long currentPhaseId;
     private LocalDate startDate;
     private LocalDate targetEndDate;
     private LocalDate actualEndDate;
     private String summary;
     private String notes;
     private Integer planVersion;
+    private Integer reviewIntervalDays;
+    private LocalDateTime nextReviewAt;
+    private java.math.BigDecimal adherenceScore;
+    @Version
+    private Integer version;
 
     @TableLogic
     private Integer deleted;

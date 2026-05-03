@@ -22,6 +22,11 @@ public class RiskEvent implements Serializable {
     private String computedLevel;
     private String decision;
     private Long suppressedByAlertId;
+    private Long crisisCaseId;
+    private LocalDateTime windowStart;
+    private LocalDateTime windowEnd;
+    private java.math.BigDecimal confidence;
+    private String explanationJson;
     private LocalDateTime detectedAt;
 
     @TableLogic

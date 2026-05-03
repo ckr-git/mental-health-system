@@ -29,6 +29,18 @@ public class AppointmentWaitlist implements Serializable {
 
     private String symptoms;
 
+    // Phase 1 新增
+    private Integer priorityScore;
+    private String priorityFactorsJson;
+    private String riskLevel;
+    private String isFollowup;
+    private Long treatmentPlanId;
+    private LocalDateTime offerExpireAt;
+    private LocalDateTime acceptedAt;
+    private String declineReason;
+    @Version
+    private Integer version;
+
     /** WAITING, NOTIFIED, BOOKED, EXPIRED, CANCELLED */
     private String status;
 

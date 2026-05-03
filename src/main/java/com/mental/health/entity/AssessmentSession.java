@@ -15,6 +15,15 @@ public class AssessmentSession implements Serializable {
 
     private Long userId;
     private Long scaleId;
+    // Phase 1 新增
+    private Long assignmentId;
+    private Long assignedBy;
+    private LocalDateTime assignedAt;
+    private LocalDateTime dueAt;
+    private String baselineFlag;
+    private java.math.BigDecimal changeFromBaseline;
+    private String clinicalFlag;
+
     private String source;
     private String sessionStatus;
     private LocalDateTime startedAt;

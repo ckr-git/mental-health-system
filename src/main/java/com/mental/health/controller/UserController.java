@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+import java.util.Objects;
+
 /**
  * 用户控制器
  */
@@ -137,6 +139,7 @@ public class UserController {
             @RequestParam(required = false) String role,
             @RequestParam(required = false) String keyword) {
         IPage<User> users = userService.getUserList(pageNum, pageSize, role, keyword);
+        users.getRecords().stream().filter(Objects::nonNull).forEach(user -> user.setPassword(null));
         return Result.success(users);
     }
 
@@ -189,6 +192,7 @@ public class UserController {
             @RequestParam(required = false) String specialty,
             @RequestParam(required = false) String keyword) {
         IPage<User> doctors = userService.getDoctorList(pageNum, pageSize, specialty, keyword);
+        doctors.getRecords().stream().filter(Objects::nonNull).forEach(doctor -> doctor.setPassword(null));
         return Result.success(doctors);
     }
 
